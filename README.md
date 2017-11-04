@@ -7,9 +7,9 @@ GoogleがTensorflowを使って、世界の株価のデータを機械学習さ�
 
 そこで、このサンプルを仮想通貨に適用してみたら、どのような結果が出るのだろうか、ということを試みた。
 サンプルのソースコードを適用するにあたって、[TensorFlowを投資につかうまで 衝撃のサンプル編 (1)](https://qiita.com/verizi/items/2685ed83b69a6830848e)のシリーズも非常に参考にした。Googleのサンプルは英語なので、英語が苦手な人はこちらのシリーズを読むと良いと思う。
- 
+
 開発環境は以下の通り。
- 
+
  - Python 3.5.2
  - TensorFlow 1.3.0
  - jupyter 1.0.0
@@ -70,12 +70,12 @@ def merge_dfs(dataframes, labels, col):
     series_dict = {}
     for index in range(len(dataframes)):
         series_dict[labels[index]] = dataframes[index][col]
-        
+
     return pd.DataFrame(series_dict)
 ```
 
 それぞれの取引所のデータから"Weighted Price"の列を取り出して、1つにまとめる。
-    
+
 ```python
 btc_datasets = merge_dfs(list(exchange_data.values()), \
                          list(exchange_data.keys()), 'Weighted Price')
@@ -88,10 +88,10 @@ def df_plot(df, title):
     fig = plt.figure()
     fig.set_figwidth(15)
     fig.set_figheight(10)
-    
+
     for column in df.columns:
         plt.plot(df[column], label=column)
-    
+
     plt.legend(loc='upper left', frameon=False)
     plt.title(title)
     plt.show()
@@ -150,7 +150,7 @@ def get_json_data(json_url, cache_path):
 base_polo_url = 'https://poloniex.com/public?command=returnChartData&currencyPair={}&start={}&end={}&period={}'
 start_date = datetime.strptime('2015-01-01', '%Y-%m-%d')
 # 今日の日付だと欠損値の場合があるので、１日前のデータまでを取得する
-end_date = date.today() - timedelta(1) 
+end_date = date.today() - timedelta(1)
 period = 86400
 
 def get_crypto_data(poloniex_pair):
@@ -215,7 +215,7 @@ coins = list(combined_df.keys())
 
 for coin in coins:
     normalized_df[coin] = combined_df[coin] / combined_df.max()[coin]
-    
+
 df_plot(np.log(normalized_df), 'Normalized Prices')
 ```
 
@@ -397,7 +397,7 @@ columns = ["positive", "negative"]
 columns += altcoins
 for i in range(1, 4) :
     columns += ['{}_{}'.format(coin, str(i)) for coin in coins]
-    
+
 training_tests_data = pd.DataFrame(columns=columns)
 training_tests_data["positive"] = log_return_df["btc_log_return_positive"]
 training_tests_data["negative"] = log_return_df["btc_log_return_negative"]
@@ -515,7 +515,7 @@ def tf_confusion_metrics(model, actual_classes, session, feed_dict):
 ```
 
 ### モデルの作成
- 
+
 ここからやっとTensorFlowを使ってモデルを作っていく。  
 最初は隠れ層のない非常に単純なモデルで試してみる。出力層ではsoftmax関数を使い、損失関数は交差エントロピー誤差を使用する。
 
@@ -549,9 +549,9 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 for i in range(1, 30001):
     sess.run(
-        training_step, 
+        training_step,
         feed_dict={
-          feature_data: training_predictors.values, 
+          feature_data: training_predictors.values,
           actual_classes: training_classes.values.reshape(len(training_classes.values), 2)
         }
     )
@@ -559,10 +559,10 @@ for i in range(1, 30001):
         print(i, sess.run(
           accuracy,
           feed_dict={
-            feature_data: training_predictors.values, 
+            feature_data: training_predictors.values,
             actual_classes: training_classes.values.reshape(len(training_classes.values), 2)
           }
-    )) 
+    ))
 ```   
 
 ![simple_trainig_result](./graphs/simple_trainig_result.png)
@@ -600,7 +600,7 @@ biases1 = tf.Variable(tf.ones([50]))
 
 weights2 = tf.Variable(tf.truncated_normal([50, 25], stddev=0.0001))
 biases2 = tf.Variable(tf.ones([25]))
-                     
+
 weights3 = tf.Variable(tf.truncated_normal([25, 2], stddev=0.0001))
 biases3 = tf.Variable(tf.ones([2]))
 
@@ -625,9 +625,9 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 for i in range(1, 30001):
     sess1.run(
-    train_op1, 
+    train_op1,
     feed_dict={
-      feature_data: training_predictors.values, 
+      feature_data: training_predictors.values,
       actual_classes: training_classes.values.reshape(len(training_classes.values), 2)
     }
     )
@@ -635,7 +635,7 @@ for i in range(1, 30001):
         print(i, sess1.run(
           accuracy,
           feed_dict={
-            feature_data: training_predictors.values, 
+            feature_data: training_predictors.values,
             actual_classes: training_classes.values.reshape(len(training_classes.values), 2)
           }
         ))
@@ -660,8 +660,8 @@ tf_confusion_metrics(model, actual_classes, sess1, feed_dict)
 
 こちらもF1 Scoreが増えている。しかし、Googleのサンプルでは、隠れ層を2つ使うとF1 Scoreが0.69まで改善されていた。テストデータのAccuracyはこちらの方が高いので、過学習が起きてしまっていると予想される。
 
-##　感想
+## 感想
 それっぽい結果が出て一応安心した。  
 実際にモデルをいじくる前にデータの加工などで力尽きた感が否めないので、次回は機械学習の方に注力したいと思う。
 
-$to\ be\ conitued...$
+to be conitued...
